@@ -1,3 +1,5 @@
+#ifndef HTTP_CLIENT_HEADER
+#define HTTP_CLIENT_HEADER
 /**
  * 
  */
@@ -58,3 +60,5 @@ struct http_request {
  * Reference: http://www.cse.yorku.ca/~oz/hash.html
  */
 unsigned long hash(unsigned char *str);
+
+#endif // HTTP_CLIENT_HEADER
