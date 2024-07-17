@@ -63,4 +63,15 @@ unsigned long hash(unsigned char *str);
 
 void clear_http_request(struct http_request *request);
 
+/**
+ * @brief Set the values for creating the request line.
+ *      Example: GET /resource HTTP/1.1
+ * 
+ * @param request The structure for holding the request.
+ * @param action The verb or noun associated with the request (GET, POST, OPTIONS, etc.)
+ * @param resource The resource of the request.
+ * @param version The protocol version to use in the request.
+ */
+void set_request_method(struct http_request *request, char *action, char *resource, char *version);
+
 #endif // HTTP_CLIENT_HEADER
