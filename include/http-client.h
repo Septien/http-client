@@ -61,4 +61,6 @@ struct http_request {
  */
 unsigned long hash(unsigned char *str);
 
+void clear_http_request(struct http_request *request);
+
 #endif // HTTP_CLIENT_HEADER

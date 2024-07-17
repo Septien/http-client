@@ -10,3 +10,7 @@ unsigned long hash(unsigned char *str) {
 
     return hash;
 }
+
+void clear_http_request(struct http_request *request) {
+    memset(request, 0, sizeof(struct http_request));
+}
