@@ -26,7 +26,7 @@ void set_request_method(struct http_request *request, char *action, char *resour
     strncpy(request->version, version, strlen(version));
 }
 
-void set_header(struct http_request *request, char *name, char* value) {
+void set_header(struct http_request *request, char *name, char *value) {
     assert(request != NULL);
     /* Convert to lower case. */
     int n = strlen(name);

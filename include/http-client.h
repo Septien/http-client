@@ -74,6 +74,17 @@ void clear_http_request(struct http_request *request);
  */
 void set_request_method(struct http_request *request, char *action, char *resource, char *version);
 
-void set_header(struct http_request *request, char *name, char* value);
+/**
+ * @brief Set the headers' name and value for the request. As the
+ * headers in the request are case-insensitive, you can pass the header
+ * name either in upper case or lower case, and will always store the
+ * header in the same position, avoiding duplicates. If you pass
+ * an already existing header, it will overwrite its previous value.
+ * 
+ * @param request The structure holding the request data.
+ * @param name The header's name.
+ * @param value The header's value.
+ */
+void set_header(struct http_request *request, char *name, char *value);
 
 #endif // HTTP_CLIENT_HEADER
