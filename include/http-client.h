@@ -22,7 +22,7 @@
 
 /* For the body, configurable */
 #ifndef BODY_LEN
-#define BODY_LEN 1000
+#define BODY_LEN 1024
 #endif
 
 struct Key {
@@ -86,5 +86,10 @@ void set_request_method(struct http_request *request, char *action, char *resour
  * @param value The header's value.
  */
 void set_header(struct http_request *request, char *name, char *value);
+
+/**
+ * 
+ */
+void set_body(struct http_request *request, char *body, int len, char *type);
 
 #endif // HTTP_CLIENT_HEADER

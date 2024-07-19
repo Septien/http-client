@@ -1,6 +1,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdio.h>
 
 #include "http-client.h"
 
@@ -41,4 +42,27 @@ void set_header(struct http_request *request, char *name, char *value) {
     strncpy(request->header[idx].key.key, name, strlen(name));
     /* Copy the value name */
     strncpy(request->header[idx].value.value, value, strlen(value));
+}
+
+void set_body(struct http_request *request, char *body, int len, char *type)
+{
+    (void) type;
+    (void) len;
+    int n = 0;
+    if (len > 0) {
+        n = (len < BODY_LEN ? len : BODY_LEN);
+    } else {
+        n = strlen(body);
+        n = n < BODY_LEN ? n : BODY_LEN;
+    }
+    if (type != NULL && strlen(type) > 0) {
+        int m = 0, _n = n;
+        // Get the number of digits in the body's length
+        while (_n > 0) { m++; _n /= 10; }
+        char body_len[m];
+        sprintf(body_len, "%d", n);
+        set_header(request, "Content-Type", type);
+        set_header(request, "Content-Length", body_len);
+    }
+    strncpy(request->body, body, n);
 }

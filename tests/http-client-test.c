@@ -105,6 +105,47 @@ bool test_set_header_double(void *arg) {
     return passed;
 }
 
+bool test_set_body(void *arg) {
+    struct data *req = (struct data *)arg;
+    struct http_request *request = &req->request;
+
+    char *body = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rutrum posuere dolor eget feugiat. Morbi rhoncus sollicitudin eleifend. Curabitur enim felis, vulputate sed volutpat a, efficitur non magna. Suspendisse iaculis nunc in eros ullamcorper dictum. Vestibulum vitae auctor est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus diam lectus, volutpat ac auctor auctor, luctus vel lectus. Sed in pulvinar massa. Mauris et consectetur erat. Cras dapibus nisl turpis, eget blandit nibh aliquam id. Donec in finibus diam. Quisque eu augue efficitur, condimentum quam vitae, ultricies orci.\0";
+    int len = strlen(body);
+    set_body(request, body, 0, NULL);
+
+    char str[200];
+    bool passed = check_condition(true, strncmp(request->body, body, len) == 0, "Body is correctly copied", str);
+
+    if (!passed) printf("%s\n", str);
+    return passed;
+}
+
+bool test_set_body_and_add_header(void *arg) {
+    struct data *req = (struct data *)arg;
+    struct http_request *request = &req->request;
+
+    char *body = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rutrum posuere dolor eget feugiat. Morbi rhoncus sollicitudin eleifend. Curabitur enim felis, vulputate sed volutpat a, efficitur non magna. Suspendisse iaculis nunc in eros ullamcorper dictum. Vestibulum vitae auctor est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus diam lectus, volutpat ac auctor auctor, luctus vel lectus. Sed in pulvinar massa. Mauris et consectetur erat. Cras dapibus nisl turpis, eget blandit nibh aliquam id. Donec in finibus diam. Quisque eu augue efficitur, condimentum quam vitae, ultricies orci.\0";
+    char *type = "text/plain";
+    int len = strlen(body);
+    set_body(request, body, len, type);
+
+    char *header1 = "content-type\0";
+    char *header2 = "content-length\0";
+    long unsigned idx = hash((unsigned char *)header1);
+    long unsigned idx2 = hash((unsigned char *)header2);
+    char str[200];
+    char body_len[10];
+    sprintf(body_len, "%d", len);
+    bool passed = check_condition(true, strncmp(request->body, body, len) == 0, "Body is correctly copied", str);
+    passed = check_condition(passed, strncmp(request->header[idx].key.key, "Content-Type", 12) == 0, "Set Content-Type value", str);
+    passed = check_condition(passed, strncmp(request->header[idx].value.value, type, 10) == 0, "Set Content-Type value", str);
+    passed = check_condition(passed, strncmp(request->header[idx2].key.key, "Content-Length", 12) == 0, "Set Content-Length header name", str);
+    passed = check_condition(passed, strncmp(request->header[idx2].value.value, body_len, strlen(body_len)) == 0, "Set Content-Length value", str);
+
+    if (!passed) printf("%s\n", str);
+    return passed;
+}
+
 void http_client_tests(void)
 {
     cUnit_t *tests;
@@ -116,6 +157,8 @@ void http_client_tests(void)
     cunit_add_test(tests, &test_set_request_method, "set_request_method");
     cunit_add_test(tests, &test_set_header, "set_header");
     cunit_add_test(tests, &test_set_header_double, "set_header, double header");
+    cunit_add_test(tests, &test_set_body, "set_body");
+    cunit_add_test(tests, &test_set_body_and_add_header, "set_body_and_add_header");
 
     cunit_execute_tests(tests);
 
