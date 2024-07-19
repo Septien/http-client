@@ -26,11 +26,11 @@
 #endif
 
 struct Key {
-    char keys[HEADERS_LEN];
+    char key[HEADERS_LEN];
 };
 
 struct Value {
-    char values[HEADERS_LEN];
+    char value[HEADERS_LEN];
 };
 
 /* A data structure for simulating a hash map */
@@ -73,5 +73,7 @@ void clear_http_request(struct http_request *request);
  * @param version The protocol version to use in the request.
  */
 void set_request_method(struct http_request *request, char *action, char *resource, char *version);
+
+void set_header(struct http_request *request, char *name, char* value);
 
 #endif // HTTP_CLIENT_HEADER

@@ -63,6 +63,48 @@ bool test_set_request_method(void *arg) {
     return passed;
 }
 
+bool test_set_header(void *arg) {
+    struct data *req = (struct data *)arg;
+    struct http_request *request = &req->request;
+
+    char *name = "host";
+    char *value = "localhost:4221";
+
+    set_header(request, name, value);
+
+    char str[200];
+    memset(str, 0, 200);
+    unsigned long idx = hash((unsigned char *)name);
+    bool passed = check_condition(true, strncmp(request->header[idx].key.key, name, strlen(name)) == 0, "Has header name", str);
+    passed = check_condition(passed, strncmp(request->header[idx].value.value, value, strlen(value)) == 0, "Has header value", str);
+
+    if (!passed) printf("%s\n", str);
+    return passed;
+}
+
+bool test_set_header_double(void *arg) {
+    struct data *req = (struct data *)arg;
+    struct http_request *request = &req->request;
+
+    char *name = "Host";
+    char *value = "localhost:4221";
+    char *name2 = "host";
+    char *value2 = "localhost:4222";
+
+    set_header(request, name, value);
+
+    set_header(request, name2, value2);
+
+    char str[200];
+    unsigned long idx = hash((unsigned char *)name2);
+    bool passed = check_condition(true, strncmp(request->header[idx].key.key, name2, strlen(name2)) == 0, "Header not modified", str);
+    passed = check_condition(passed, strncmp(request->header[idx].value.value, value2, strlen(value2)) == 0, "Value not modified", str);
+
+    if (!passed) printf("%s\n", str);
+
+    return passed;
+}
+
 void http_client_tests(void)
 {
     cUnit_t *tests;
@@ -72,6 +114,8 @@ void http_client_tests(void)
 
     cunit_add_test(tests, &test_clear_http_request, "init_http_request");
     cunit_add_test(tests, &test_set_request_method, "set_request_method");
+    cunit_add_test(tests, &test_set_header, "set_header");
+    cunit_add_test(tests, &test_set_header_double, "set_header, double header");
 
     cunit_execute_tests(tests);
 
