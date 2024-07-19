@@ -88,7 +88,14 @@ void set_request_method(struct http_request *request, char *action, char *resour
 void set_header(struct http_request *request, char *name, char *value);
 
 /**
+ * @brief Copy the body to the request. You can pass the body's length and the
+ * body's type (text/plain, text/html...) and the function will add the headers
+ * 'Content-Type' and 'Content-Length' with their corresponding values for you.
  * 
+ * @param request The structure holding the request data.
+ * @param body The request's body.
+ * @param len The body's len, used for the header. May be zero.
+ * @param type The body's type, used for the header. May NULL or "".
  */
 void set_body(struct http_request *request, char *body, int len, char *type);
 
