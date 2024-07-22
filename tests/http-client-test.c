@@ -45,15 +45,14 @@ bool test_clear_http_request(void *arg) {
 bool test_set_request_method(void *arg) {
     struct data *req = (struct data *)arg;
     struct http_request *request = &req->request;
-    char *action = "POST";
-    char *resource = "/some/url/for/testing";
-    char *version = "HTTP/1.1";
+    char *action = "POST\0";
+    char *resource = "/some/url/for/testing\0";
+    char *version = "HTTP/1.1\0";
 
     set_request_method(request, action, resource, version);
 
     char str[200];
     memset(str, 0, 200);
-
     bool passed = check_condition(true, strncmp(request->action, action, 4) == 0, "Action is copied", str);
     passed = check_condition(true, strncmp(request->resource, resource, strlen(resource)) == 0, "Resource is copied", str);
     passed = check_condition(true, strncmp(request->version, version, strlen(version)) == 0, "Version is copied", str);
@@ -67,14 +66,14 @@ bool test_set_header(void *arg) {
     struct data *req = (struct data *)arg;
     struct http_request *request = &req->request;
 
-    char *name = "host";
-    char *value = "localhost:4221";
+    char *name = "User-Agent\0";
+    char *value = "foobar\0";
 
     set_header(request, name, value);
 
     char str[200];
     memset(str, 0, 200);
-    unsigned long idx = hash((unsigned char *)name);
+    unsigned long idx = hash((unsigned char *)"user-agent\0");
     bool passed = check_condition(true, strncmp(request->header[idx].key.key, name, strlen(name)) == 0, "Has header name", str);
     passed = check_condition(passed, strncmp(request->header[idx].value.value, value, strlen(value)) == 0, "Has header value", str);
 
@@ -86,18 +85,20 @@ bool test_set_header_double(void *arg) {
     struct data *req = (struct data *)arg;
     struct http_request *request = &req->request;
 
-    char *name = "Host";
-    char *value = "localhost:4221";
-    char *name2 = "host";
-    char *value2 = "localhost:4222";
-
-    set_header(request, name, value);
-
-    set_header(request, name2, value2);
+    char *name = "Host\0";
+    char *value = "localhost:4221\0";
+    char *name2 = "host\0";
+    char *value2 = "localhost:4222\0";
 
     char str[200];
     unsigned long idx = hash((unsigned char *)name2);
-    bool passed = check_condition(true, strncmp(request->header[idx].key.key, name2, strlen(name2)) == 0, "Header not modified", str);
+    bool passed = check_condition(true, strlen(request->header[idx].key.key) == 0, "The header has length zero", str);
+    set_header(request, name, value);
+    passed = check_condition(passed, strlen(request->header[idx].key.key) > 0, "The header was added", str);
+
+    set_header(request, name2, value2);
+
+    passed = check_condition(passed, strncmp(request->header[idx].key.key, name2, strlen(name2)) == 0, "Header not modified", str);
     passed = check_condition(passed, strncmp(request->header[idx].value.value, value2, strlen(value2)) == 0, "Value not modified", str);
 
     if (!passed) printf("%s\n", str);

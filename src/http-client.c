@@ -46,8 +46,6 @@ void set_header(struct http_request *request, char *name, char *value) {
 
 void set_body(struct http_request *request, char *body, int len, char *type)
 {
-    (void) type;
-    (void) len;
     int n = 0;
     if (len > 0) {
         n = (len < BODY_LEN ? len : BODY_LEN);
