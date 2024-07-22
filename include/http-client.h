@@ -8,17 +8,17 @@
 
 /* For the request, configurable */
 #ifndef REQUEST_LEN
-#define REQUEST_LEN 2000
+#define REQUEST_LEN 4096
 #endif
 
 /* For the request line */
 #define ACTION_LEN 7
 #define RESOURCE_LEN 50
-#define VERSION_LEN 8
+#define VERSION_LEN 9
 
 /* For the map structure */
 #define HEADERS_LEN 50
-#define HEADERS 100
+#define HEADERS 50
 
 /* For the body, configurable */
 #ifndef BODY_LEN
@@ -98,5 +98,14 @@ void set_header(struct http_request *request, char *name, char *value);
  * @param type The body's type, used for the header. May NULL or "".
  */
 void set_body(struct http_request *request, char *body, int len, char *type);
+
+/**
+ * @brief Create a request string from the request structure, ready to be
+ *        to the server. The headers do not follow any particular order.
+ *
+ * @param request The structure holding the request's data.
+ * @param str String for storing the request.
+ */
+void create_request_str(struct http_request *request, char **str);
 
 #endif // HTTP_CLIENT_HEADER

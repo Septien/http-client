@@ -147,6 +147,57 @@ bool test_set_body_and_add_header(void *arg) {
     return passed;
 }
 
+bool test_create_request_str(void *arg) {
+    struct data *req = (struct data *) arg;
+    struct http_request *request = &req->request;
+
+    set_request_method(request, "GET\0", "/resource/example\0", "HTTP/1.1\0");
+    set_header(request, "User-Agent\0", "foobar/1.2.3\0");
+    set_header(request, "Host\0", "localhost:4221\0");
+    set_header(request, "Accept\0", "text/plain, text/json\0");
+
+    char *body = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rutrum posuere dolor eget feugiat. Morbi rhoncus sollicitudin eleifend. Curabitur enim felis, vulputate sed volutpat a, efficitur non magna. Suspendisse iaculis nunc in eros ullamcorper dictum. Vestibulum vitae auctor est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus diam lectus, volutpat ac auctor auctor, luctus vel lectus. Sed in pulvinar massa. Mauris et consectetur erat. Cras dapibus nisl turpis, eget blandit nibh aliquam id. Donec in finibus diam. Quisque eu augue efficitur, condimentum quam vitae, ultricies orci.\0";
+    char *type = "text/plain";
+    int len = strlen(body);
+    set_body(request, body, len, type);
+
+    char str[REQUEST_LEN];
+    char *str_p = str;
+    memset(str, 0, REQUEST_LEN);
+    create_request_str(request, &str_p);
+
+    char *str2 = "GET /resource/example HTTP/1.1\r\nUser-Agent: foobar/1.2.3\r\nHost: localhost:4221\r\nContent-Length: 610\r\nContent-Type: text/plain\r\nAccept: text/plain, text/json\r\n\r\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rutrum posuere dolor eget feugiat. Morbi rhoncus sollicitudin eleifend. Curabitur enim felis, vulputate sed volutpat a, efficitur non magna. Suspendisse iaculis nunc in eros ullamcorper dictum. Vestibulum vitae auctor est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus diam lectus, volutpat ac auctor auctor, luctus vel lectus. Sed in pulvinar massa. Mauris et consectetur erat. Cras dapibus nisl turpis, eget blandit nibh aliquam id. Donec in finibus diam. Quisque eu augue efficitur, condimentum quam vitae, ultricies orci.\0";
+    char strm[200];
+    memset(strm, 0, 200);
+    bool passed = check_condition(true, strncmp(str, str2, strlen(str)) == 0, "Request is properly formed", strm);
+
+    return passed;
+}
+
+bool test_create_request_null_body(void *arg) {
+    struct data *req = (struct data *) arg;
+    struct http_request *request = &req->request;
+
+    set_request_method(request, "GET\0", "/resource/example\0", "HTTP/1.1\0");
+    set_header(request, "User-Agent\0", "foobar/1.2.3\0");
+    set_header(request, "Host\0", "localhost:4221\0");
+    set_header(request, "Accept\0", "text/plain, text/json\0");
+
+    char str[REQUEST_LEN];
+    char *str_p = str;
+    memset(str, 0, REQUEST_LEN);
+    create_request_str(request, &str_p);
+
+    char *str2 = "GET /resource/example HTTP/1.1\r\nUser-Agent: foobar/1.2.3\r\nHost: localhost:4221\r\nAccept: text/plain, text/json\r\n\r\n\0";
+    char strm[200];
+    memset(strm, 0, 200);
+    bool passed = check_condition(true, strncmp(str, str2, strlen(str)) == 0, "Request is properly formed", strm);
+
+    if (!passed) printf("%s\n", strm);
+
+    return passed;
+}
+
 void http_client_tests(void)
 {
     cUnit_t *tests;
@@ -160,6 +211,8 @@ void http_client_tests(void)
     cunit_add_test(tests, &test_set_header_double, "set_header, double header");
     cunit_add_test(tests, &test_set_body, "set_body");
     cunit_add_test(tests, &test_set_body_and_add_header, "set_body_and_add_header");
+    cunit_add_test(tests, &test_create_request_str, "create_request_str");
+    cunit_add_test(tests, &test_create_request_null_body, "create_request_str w/null body");
 
     cunit_execute_tests(tests);
 
