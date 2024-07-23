@@ -15,6 +15,8 @@ unsigned long hash(unsigned char *str) {
     return hash % HEADERS;
 }
 
+/*---------------------- HTTP request ----------------------*/
+
 void clear_http_request(struct http_request *request) {
     memset(request, 0, sizeof(struct http_request));
 }
@@ -83,4 +85,80 @@ void create_request_str(struct http_request *request, char **str)
     }
     strcat(*str, "\r\n");
     strcat(*str, request->body);
+}
+
+/*---------------------- HTTP response ----------------------*/
+
+void clear_http_response(struct http_response *response)
+{
+    memset(response, 0, sizeof(struct http_response));
+}
+
+/*
+* Parse a string in search of del delimiter, beginning at start. 
+* Returns the substring's length.
+*/
+unsigned long parse_string(char *str, char del, unsigned long start)
+{
+    if (start > strlen(str)) {
+        return -1;
+    }
+    unsigned long i = start;
+    while (str[i++] != del) {}
+
+    return i;
+}
+
+/*
+* Verify whether the following four characters are \r\n\r\n
+* indicating the headers' end.
+*/
+int headers_end(char *str, unsigned long i)
+{
+    return (str[i] == '\r') && (str[i + 1] == '\n') && (str[i + 2] == '\r') && (str[i + 3] == '\n');
+}
+
+unsigned long copy_string(char *dest, char *src, char del, unsigned long start)
+{
+    unsigned long len = 0;
+    len = parse_string(src, del, start);
+    strncpy(dest, &src[start], len - 1);
+    return len;
+}
+
+void parse_response_str(struct http_response *response, char *str)
+{
+    // Get the status line's information
+    unsigned long len = 0;
+    len = copy_string(response->version, str, ' ', len);
+    len = copy_string(response->status_code, str, ' ', len);
+    len = copy_string(response->status_text, str, '\r', len);
+
+    unsigned long body_len = 0;
+    // Parse the headers
+    while (!headers_end(str, len - 1)) {
+        len++;     // Advance to characters to remove \r\n
+        // Search for the header name
+        int start = len;
+        len = parse_string(str, ':', len);
+        char header[HEADERS_LEN];
+        memset(header, 0, HEADERS_LEN);
+        strncpy(header, &str[start], len - start - 1);
+        unsigned long idx = hash((unsigned char *)header);
+        strncpy(response->headers[idx].key.key, header, len - start - 1);
+        // Search for header's value
+        start = len + 1; // Remove space
+        len = parse_string(str, '\r', start);
+        memset(header, 0, HEADERS_LEN);
+        strncpy(header, &str[start], len - start - 1);
+        strncpy(response->headers[idx].value.value, header, len - start - 1);
+        // Check for body presence
+        if (strcmp(response->headers[idx].key.key, "Content-Length") == 0 || strcmp(response->headers[idx].key.key, "content-length") == 0) {
+            sscanf(response->headers[idx].value.value, "%lu", &body_len);
+        }
+    }
+    if (body_len > 0) {
+        int body_start = strlen(str) - body_len;
+        strncpy(response->body, &str[body_start], body_len);
+    }
 }

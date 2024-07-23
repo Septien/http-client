@@ -16,6 +16,10 @@
 #define RESOURCE_LEN 50
 #define VERSION_LEN 9
 
+/* For the response line */
+#define STATUS_LEN 3    // It contains only 3 numbers
+#define ST_TXT_LEN 100  // Len of status text
+
 /* For the map structure */
 #define HEADERS_LEN 50
 #define HEADERS 50
@@ -40,8 +44,7 @@ struct Map {
 };
 
 /**
- * It holds all the information associated with a
- * http request.
+ * @brief Holds the data associated with a http request.
  */
 struct http_request {
     /* Related to the request line */
@@ -55,6 +58,20 @@ struct http_request {
 };
 
 /**
+ * @brief Holds the data associated with a http response. 
+ */
+struct http_response {
+    /* Response line */
+    char version[VERSION_LEN];
+    char status_code[STATUS_LEN];
+    char status_text[ST_TXT_LEN];
+    /* The headers */
+    struct Map headers[HEADERS];
+    /* Body */
+    char body[BODY_LEN];
+};
+
+/**
  * The djb2 hash function for strings.
  * 
  * Reference: http://www.cse.yorku.ca/~oz/hash.html
@@ -62,6 +79,8 @@ struct http_request {
 unsigned long hash(unsigned char *str);
 
 void clear_http_request(struct http_request *request);
+
+void clear_http_response(struct http_response *response);
 
 /**
  * @brief Set the values for creating the request line.
@@ -107,5 +126,10 @@ void set_body(struct http_request *request, char *body, int len, char *type);
  * @param str String for storing the request.
  */
 void create_request_str(struct http_request *request, char **str);
+
+/**
+ * @brief
+ */
+void parse_response_str(struct http_response *response, char *str);
 
 #endif // HTTP_CLIENT_HEADER
