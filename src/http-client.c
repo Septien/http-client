@@ -111,7 +111,7 @@ unsigned long parse_string(char *str, char del, unsigned long start)
 
 /*
 * Verify whether the following four characters are \r\n\r\n
-* indicating the headers' end.
+* indicating the headers section's end.
 */
 int headers_end(char *str, unsigned long i)
 {
@@ -137,6 +137,13 @@ void parse_response_str(struct http_response *response, char *str)
     unsigned long body_len = 0;
     // Parse the headers
     while (!headers_end(str, len - 1)) {
+        /* The headers follow the format: HEADER_NAME: HEADER_VALUE\r\n
+        *  We parse the string until the character ':' is found to obtain
+        *  the header name. Then skip the whitespace and obtain the 
+        *  header's value. We manually skip \r\n for not storing them
+        *  in the header's value.
+        */
+
         len++;     // Advance to characters to remove \r\n
         // Search for the header name
         int start = len;
@@ -144,20 +151,23 @@ void parse_response_str(struct http_response *response, char *str)
         char header[HEADERS_LEN];
         memset(header, 0, HEADERS_LEN);
         int n = len - start - 1;
+        // Store header in lower case, for ease of search
         for (int i = 0; i < n; i++) {
             header[i] = tolower(str[start + i]);
         }
         header[n] = '\0';
         unsigned long idx = hash((unsigned char *)header);
         strncpy(response->headers[idx].key.key, header, len - start - 1);
+
         // Search for header's value
         start = len + 1; // Remove space
         len = parse_string(str, '\r', start);
         memset(header, 0, HEADERS_LEN);
         strncpy(header, &str[start], len - start - 1);
         strncpy(response->headers[idx].value.value, header, len - start - 1);
+
         // Check for body presence
-        if (strcmp(response->headers[idx].key.key, "Content-Length") == 0 || strcmp(response->headers[idx].key.key, "content-length") == 0) {
+        if (strcmp(response->headers[idx].key.key, "content-length") == 0) {
             sscanf(response->headers[idx].value.value, "%lu", &body_len);
         }
     }

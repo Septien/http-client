@@ -128,7 +128,11 @@ void set_body(struct http_request *request, char *body, int len, char *type);
 void create_request_str(struct http_request *request, char **str);
 
 /**
- * @brief
+ * @brief Parse the response string returned form the header and store all
+ *        the values in the response structure.
+ * 
+ * @param reponse The structure to hold the response returned form server.
+ * @param str The string containing the response.
  */
 void parse_response_str(struct http_response *response, char *str);
 
