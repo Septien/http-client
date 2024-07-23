@@ -143,7 +143,11 @@ void parse_response_str(struct http_response *response, char *str)
         len = parse_string(str, ':', len);
         char header[HEADERS_LEN];
         memset(header, 0, HEADERS_LEN);
-        strncpy(header, &str[start], len - start - 1);
+        int n = len - start - 1;
+        for (int i = 0; i < n; i++) {
+            header[i] = tolower(str[start + i]);
+        }
+        header[n] = '\0';
         unsigned long idx = hash((unsigned char *)header);
         strncpy(response->headers[idx].key.key, header, len - start - 1);
         // Search for header's value
