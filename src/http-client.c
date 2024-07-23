@@ -171,6 +171,7 @@ void parse_response_str(struct http_response *response, char *str)
             sscanf(response->headers[idx].value.value, "%lu", &body_len);
         }
     }
+
     if (body_len > 0) {
         int body_start = strlen(str) - body_len;
         strncpy(response->body, &str[body_start], body_len);

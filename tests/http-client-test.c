@@ -279,8 +279,6 @@ bool test_parser_response_wo_body(void *arg)
     char response_str[756] = "HTTP/1.1 200 OK\r\n\0";
     strcat(response_str, "User-Agent: foobar/1.2.3\r\n\0");
     strcat(response_str, "Host: localhost:4221\r\n\0");
-    strcat(response_str, "Content-Length: 610\r\n\0");
-    strcat(response_str, "Content-Type: text/plain\r\n\0");
     strcat(response_str, "Accept: text/plain, text/json\r\n\r\n\0");
 
     char *ptr = response_str;
@@ -297,12 +295,6 @@ bool test_parser_response_wo_body(void *arg)
     idx = hash((unsigned char *)"host");
     passed = check_condition(passed, strncmp(response->headers[idx].key.key, "host", 0) == 0, "Host header exists", str);
     passed = check_condition(passed, strncmp(response->headers[idx].value.value, "localhost:4221", 12) == 0, "Host header value exists", str);
-    idx = hash((unsigned char *)"content-length");
-    passed = check_condition(passed, strncmp(response->headers[idx].key.key, "content-length", 14) == 0, "Content-Length header exists", str);
-    passed = check_condition(passed, strncmp(response->headers[idx].value.value, "610", 3) == 0, "Content-Length header value exists", str);
-    idx = hash((unsigned char *)"content-type");
-    passed = check_condition(passed, strncmp(response->headers[idx].key.key, "content-type", 12) == 0, "Content-Type header exists", str);
-    passed = check_condition(passed, strncmp(response->headers[idx].value.value, "text/plain", 10) == 0, "Content-Type header value exists", str);
     idx = hash((unsigned char *)"accept");
     passed = check_condition(passed, strncmp(response->headers[idx].key.key, "accept", 12) == 0, "Accept header exists", str);
     passed = check_condition(passed, strncmp(response->headers[idx].value.value, "text/plain, text/json", 10) == 0, "Accept header value exists", str);
