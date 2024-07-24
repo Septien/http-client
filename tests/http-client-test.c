@@ -304,6 +304,36 @@ bool test_parser_response_wo_body(void *arg)
     return passed;
 }
 
+bool test_get_response_line(void *arg)
+{
+    struct data *req = (struct data *)arg;
+    struct http_response *response = &req->response;
+
+    char response_str[756] = "HTTP/1.1 404 Not Found\r\n\0";
+    strcat(response_str, "User-Agent: foobar/1.2.3\r\n\0");
+    strcat(response_str, "Host: localhost:4221\r\n\0");
+    strcat(response_str, "Accept: text/plain, text/json\r\n\r\n\0");
+
+    char *ptr = response_str;
+    parse_response_str(response, ptr);
+
+    char version[VERSION_LEN];
+    char status_code[STATUS_LEN];
+    char status_text[ST_TXT_LEN];
+    char *vptr = version, *scptr = status_code, *stptr = status_text;
+
+    get_response_line(response, vptr, scptr, stptr);
+
+    char str[256];
+    bool passed = check_condition(true, strncmp(version, "HTTP/1.1", VERSION_LEN) == 0, "Correct version", str);
+    passed = check_condition(passed, strncmp(status_code, "404", STATUS_LEN) == 0, "Correct status code", str);
+    passed = check_condition(passed, strncmp(status_text, "Not Found", ST_TXT_LEN) == 0, "Correct status text", str);
+
+    if (!passed) printf("%s\n", str);
+
+    return passed;
+}
+
 void http_client_tests(void)
 {
     cUnit_t *tests;
@@ -324,6 +354,7 @@ void http_client_tests(void)
     cunit_add_test(tests, &test_clear_http_response, "clear_http_response");
     cunit_add_test(tests, &test_parse_response_str_w_body, "paser_response_str w/body");
     cunit_add_test(tests, &test_parser_response_wo_body, "parse_response wo/body");
+    cunit_add_test(tests, &test_get_response_line, "get_response_line");
 
     cunit_execute_tests(tests);
 

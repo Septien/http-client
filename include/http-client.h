@@ -136,4 +136,15 @@ void create_request_str(struct http_request *request, char **str);
  */
 void parse_response_str(struct http_response *response, char *str);
 
+/**
+ * @brief Returns the protocol version, status code, and status text
+ *        recieved form the server.
+ *
+ * @param response The structure containing the response.
+ * @param version Array holding the protocol's version.
+ * @param code Array containing the status code.
+ * @param status Array containing the status text.
+ */
+void get_response_line(struct http_response *response, char *version, char *code, char *status);
+
 #endif // HTTP_CLIENT_HEADER

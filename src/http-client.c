@@ -122,7 +122,8 @@ unsigned long copy_string(char *dest, char *src, char del, unsigned long start)
 {
     unsigned long len = 0;
     len = parse_string(src, del, start);
-    strncpy(dest, &src[start], len - 1);
+    strncpy(dest, &src[start], len - start - 1);
+    dest[len] = '\0';
     return len;
 }
 
@@ -137,7 +138,8 @@ void parse_response_str(struct http_response *response, char *str)
     unsigned long body_len = 0;
     // Parse the headers
     while (!headers_end(str, len - 1)) {
-        /* The headers follow the format: HEADER_NAME: HEADER_VALUE\r\n
+        /* The headers follow the format:
+        *               HEADER_NAME: HEADER_VALUE\r\n
         *  We parse the string until the character ':' is found to obtain
         *  the header name. Then skip the whitespace and obtain the 
         *  header's value. We manually skip \r\n for not storing them
@@ -176,4 +178,11 @@ void parse_response_str(struct http_response *response, char *str)
         int body_start = strlen(str) - body_len;
         strncpy(response->body, &str[body_start], body_len);
     }
+}
+
+void get_response_line(struct http_response *response, char *version, char *code, char *status)
+{
+    strncpy(version, response->version, VERSION_LEN);
+    strncpy(code, response->status_code, STATUS_LEN);
+    strncpy(status, response->status_text, strlen(response->status_text));
 }
