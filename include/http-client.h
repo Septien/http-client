@@ -158,4 +158,18 @@ void get_response_line(struct http_response *response, char *version, char *code
  */
 int get_header(struct http_response *response, char *header, char *value);
 
+/**
+ * @brief Returns the response's body. Internally, it searches for
+ *        the 'Content-Length' header to determine whether the
+ *        body exists and its length.
+ *
+ * @param response The structure holding the response.
+ * @param body Array to store the body. It is assumed that
+ *             the variable already has allocated memory.
+ *
+ * @return -1 when there is no body, and the body length's
+ *  when it is present.
+ */
+int get_body(struct http_response *response, char *body);
+
 #endif // HTTP_CLIENT_HEADER

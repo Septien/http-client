@@ -373,6 +373,68 @@ bool test_get_header(void *arg)
     return passed;
 }
 
+bool test_get_body(void *arg)
+{
+    struct data *req = (struct data *)arg;
+    struct http_response *response = &req->response;
+
+    char response_str[756] = "HTTP/1.1 200 OK\r\n\0";
+    strcat(response_str, "User-Agent: foobar/1.2.3\r\n\0");
+    strcat(response_str, "Host: localhost:4221\r\n\0");
+    strcat(response_str, "Content-Length: 610\r\n\0");
+    strcat(response_str, "Content-Type: text/plain\r\n\0");
+    strcat(response_str, "Accept: text/plain, text/json\r\n\r\n\0");
+    char *body = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rutrum posuere dolor eget feugiat. Morbi rhoncus sollicitudin eleifend. Curabitur enim felis, vulputate sed volutpat a, efficitur non magna. Suspendisse iaculis nunc in eros ullamcorper dictum. Vestibulum vitae auctor est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus diam lectus, volutpat ac auctor auctor, luctus vel lectus. Sed in pulvinar massa. Mauris et consectetur erat. Cras dapibus nisl turpis, eget blandit nibh aliquam id. Donec in finibus diam. Quisque eu augue efficitur, condimentum quam vitae, ultricies orci.\0";
+    strcat(response_str, body);
+
+    char *ptr = response_str;
+    parse_response_str(response, ptr);
+
+    // Get the body length
+    char value[HEADERS_LEN];
+    memset(value, 0, HEADERS_LEN);
+    int ret = get_header(response, "Content-Length", value);
+    unsigned long n = 0;
+    sscanf(value, "%lu", &n);
+    char str[256];
+    memset(str, 0, 256);
+    bool passed = check_condition(true, n == 610, "Size of body is correct", str);
+    char return_body[n];
+    ret = get_body(response, return_body);
+    passed = check_condition(passed, (unsigned long)ret == n, "Ret is n", str);
+    passed = check_condition(passed, strncmp(return_body, body, n) == 0, "Body is correctly returned", str);
+
+    if (!passed) printf("%s\n", str);
+
+    return passed;
+}
+
+bool test_get_body_empty(void *arg)
+{
+    struct data *req = (struct data *)arg;
+    struct http_response *response = &req->response;
+
+    char response_str[756] = "HTTP/1.1 200 OK\r\n\0";
+    strcat(response_str, "User-Agent: foobar/1.2.3\r\n\0");
+    strcat(response_str, "Host: localhost:4221\r\n\0");
+    strcat(response_str, "Accept: text/plain, text/json\r\n\r\n\0");
+
+    char *ptr = response_str;
+    parse_response_str(response, ptr);
+
+    char return_body[BODY_LEN];
+    memset(return_body, 0, BODY_LEN);
+    int ret = get_body(response, return_body);
+    char str[256];
+    memset(str, 0, 256);
+    bool passed = check_condition(true, ret == -1, "Ret is -1", str);
+    passed = check_condition(passed, strlen(return_body) == 0, "Body is correctly returned", str);
+
+    if (!passed) printf("%s\n", str);
+
+    return passed;
+}
+
 void http_client_tests(void)
 {
     cUnit_t *tests;
@@ -395,6 +457,8 @@ void http_client_tests(void)
     cunit_add_test(tests, &test_parser_response_wo_body, "parse_response wo/body");
     cunit_add_test(tests, &test_get_response_line, "get_response_line");
     cunit_add_test(tests, &test_get_header, "get_header");
+    cunit_add_test(tests, &test_get_body, "get_body");
+    cunit_add_test(tests, &test_get_body_empty, "get_body with empty body");
 
     cunit_execute_tests(tests);
 

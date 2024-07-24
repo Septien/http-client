@@ -206,3 +206,18 @@ int get_header(struct http_response *response, char *header, char *value)
 
     return 0;
 }
+
+int get_body(struct http_response *response, char *body)
+{
+    char value[HEADERS_LEN];
+    memset(value, 0, HEADERS_LEN);
+    int ret = get_header(response, "Content-Length", value);
+    if (ret == -1) {
+        return -1;
+    }
+    unsigned long n = 0;
+    sscanf(value, "%lu", &n);
+    strncpy(body, response->body, n);
+
+    return n;
+}
