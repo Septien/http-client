@@ -334,6 +334,45 @@ bool test_get_response_line(void *arg)
     return passed;
 }
 
+bool test_get_header(void *arg)
+{
+    struct data *req = (struct data *)arg;
+    struct http_response *response = &req->response;
+
+    char response_str[756] = "HTTP/1.1 404 Not Found\r\n\0";
+    strcat(response_str, "User-Agent: foobar/1.2.3\r\n\0");
+    strcat(response_str, "Host: localhost:4221\r\n\0");
+    strcat(response_str, "Accept: text/plain, text/json\r\n\r\n\0");
+    char *ptr = response_str;
+    parse_response_str(response, ptr);
+
+    char *header = "User-Agent\0";
+    char value[HEADERS_LEN];
+    memset(value, 0, HEADERS_LEN);
+    int ret = get_header(response, header, value);
+    char str[256];
+    memset(str, 0, 256);
+    bool passed = check_condition(true, ret == 0, "Return value is zero", str);
+    passed = check_condition(passed, strncmp(value, "foobar/1.2.3", HEADERS_LEN) == 0, "User-Agent value is correct", str);
+    memset(value, 0, HEADERS_LEN);
+    ret = get_header(response, "Host", value);
+    passed = check_condition(passed, ret == 0, "Return value is zero for host", str);
+    passed = check_condition(passed, strncmp(value, "localhost:4221", HEADERS_LEN) == 0, "Host value is valid", str);
+    memset(value, 0, HEADERS_LEN);
+    ret = get_header(response, "Accept", value);
+    passed = check_condition(passed, ret == 0, "Return value is zero for accept", str);
+    passed = check_condition(passed, strncmp(value, "text/plain, text/json", HEADERS_LEN) == 0, "Accept value is valid", str);
+    // Get a header not received in the response
+    memset(value, 0, HEADERS_LEN);
+    ret = get_header(response, "Content-Type", value);
+    passed = check_condition(passed, ret == -1, "Return value is -1 for header not present in response", str);
+    passed = check_condition(passed, strlen(value) == 0, "value array should be empty", str);
+
+    if (!passed) printf("%s\n", str);
+
+    return passed;
+}
+
 void http_client_tests(void)
 {
     cUnit_t *tests;
@@ -355,6 +394,7 @@ void http_client_tests(void)
     cunit_add_test(tests, &test_parse_response_str_w_body, "paser_response_str w/body");
     cunit_add_test(tests, &test_parser_response_wo_body, "parse_response wo/body");
     cunit_add_test(tests, &test_get_response_line, "get_response_line");
+    cunit_add_test(tests, &test_get_header, "get_header");
 
     cunit_execute_tests(tests);
 

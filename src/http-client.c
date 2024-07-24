@@ -186,3 +186,23 @@ void get_response_line(struct http_response *response, char *version, char *code
     strncpy(code, response->status_code, STATUS_LEN);
     strncpy(status, response->status_text, strlen(response->status_text));
 }
+
+int get_header(struct http_response *response, char *header, char *value)
+{
+    // Convert header name to lower case
+    unsigned long n = strlen(header);
+    char lower[n + 1];
+    memset(lower, 0, n + 1);
+    for (unsigned long i = 0; i < n; i++) {
+        lower[i] = tolower(header[i]);
+    }
+    lower[n] = '\0';
+    unsigned long idx = hash((unsigned char *)lower);
+    n = strlen(response->headers[idx].value.value);
+    if (n == 0) {
+        return -1;
+    }
+    strncpy(value, response->headers[idx].value.value, n);
+
+    return 0;
+}

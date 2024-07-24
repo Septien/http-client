@@ -147,4 +147,15 @@ void parse_response_str(struct http_response *response, char *str);
  */
 void get_response_line(struct http_response *response, char *version, char *code, char *status);
 
+/**
+ * @brief Return the value of a given header.
+ *
+ * @param response The structure holding the response data.
+ * @param header The header's name.
+ * @param value Array to hold the header's value.
+ *
+ * @return 0 when header is found, -1 in other case.
+ */
+int get_header(struct http_response *response, char *header, char *value);
+
 #endif // HTTP_CLIENT_HEADER
