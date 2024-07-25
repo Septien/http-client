@@ -11,15 +11,16 @@ BIN = ./bin
 INCLUDE += $(TST)/include
 
 CFLAGS += $(addprefix -I, $(INCLUDE))
+ifdef TEST
+	CFLAGS += -DTEST
+endif
 $(info $$BIN is $(BIN))
 $(info $$SRC is $(SRC))
 
 MKDIR_BIN = mkdir -p $(BIN)
 MKDIR_SUB = mkdir -p $(BIN)/src $(BIN)/tests
 
-test: mkd $(BIN)/main.o
-
-build: mkd $(BIN)/src/http-client.o
+build: mkd $(BIN)/main.o
 
 mkd :
 	$(MKDIR_BIN)
