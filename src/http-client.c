@@ -123,7 +123,7 @@ unsigned long copy_string(char *dest, char *src, char del, unsigned long start)
     unsigned long len = 0;
     len = parse_string(src, del, start);
     strncpy(dest, &src[start], len - start - 1);
-    dest[len] = '\0';
+    dest[len - start - 1] = '\0';
     return len;
 }
 
@@ -184,7 +184,7 @@ void get_response_line(struct http_response *response, char *version, char *code
 {
     strncpy(version, response->version, VERSION_LEN);
     strncpy(code, response->status_code, STATUS_LEN);
-    strncpy(status, response->status_text, strlen(response->status_text));
+    strncpy(status, response->status_text, ST_TXT_LEN);
 }
 
 int get_header(struct http_response *response, char *header, char *value)

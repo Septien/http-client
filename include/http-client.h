@@ -17,7 +17,7 @@
 #define VERSION_LEN 9
 
 /* For the response line */
-#define STATUS_LEN 3    // It contains only 3 numbers
+#define STATUS_LEN 4    // It contains only 3 numbers
 #define ST_TXT_LEN 100  // Len of status text
 
 /* For the map structure */
