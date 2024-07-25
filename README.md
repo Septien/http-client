@@ -27,4 +27,7 @@ macros in the `http-client.h` file.
 To include it in your project, just copy the `http-client.h` and
 `http-client.c` files into your project.
 
-Running the command `make test && bin/main` will execute the unit tests.
+Running the command `make build TEST=1 && bin/main` will execute the unit tests.
+Running the command `make build && bin/main` will execute a simple example of
+sending a request and receiving a response to/from a server. Consider that you
+should have an http server running locally.
