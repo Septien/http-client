@@ -166,9 +166,8 @@ bool test_create_request_str(void *arg) {
     set_body(request, body, len, type);
 
     char str[REQUEST_LEN];
-    char *str_p = str;
     memset(str, 0, REQUEST_LEN);
-    create_request_str(request, &str_p);
+    create_request_str(request, str);
 
     char *str2 = "GET /resource/example HTTP/1.1\r\nUser-Agent: foobar/1.2.3\r\nHost: localhost:4221\r\nContent-Length: 610\r\nContent-Type: text/plain\r\nAccept: text/plain, text/json\r\n\r\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam rutrum posuere dolor eget feugiat. Morbi rhoncus sollicitudin eleifend. Curabitur enim felis, vulputate sed volutpat a, efficitur non magna. Suspendisse iaculis nunc in eros ullamcorper dictum. Vestibulum vitae auctor est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus diam lectus, volutpat ac auctor auctor, luctus vel lectus. Sed in pulvinar massa. Mauris et consectetur erat. Cras dapibus nisl turpis, eget blandit nibh aliquam id. Donec in finibus diam. Quisque eu augue efficitur, condimentum quam vitae, ultricies orci.\0";
     char strm[200];
@@ -188,9 +187,8 @@ bool test_create_request_null_body(void *arg) {
     set_header(request, "Accept\0", "text/plain, text/json\0");
 
     char str[REQUEST_LEN];
-    char *str_p = str;
     memset(str, 0, REQUEST_LEN);
-    create_request_str(request, &str_p);
+    create_request_str(request, str);
 
     char *str2 = "GET /resource/example HTTP/1.1\r\nUser-Agent: foobar/1.2.3\r\nHost: localhost:4221\r\nAccept: text/plain, text/json\r\n\r\n\0";
     char strm[200];

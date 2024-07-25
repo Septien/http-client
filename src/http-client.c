@@ -67,11 +67,11 @@ void set_body(struct http_request *request, char *body, int len, char *type)
     strncpy(request->body, body, n);
 }
 
-void create_request_str(struct http_request *request, char **str)
+void create_request_str(struct http_request *request, char *str)
 {
     assert(str != NULL);
     // Print the request line
-    sprintf(*str, "%s %s %s\r\n", request->action, request->resource, request->version);
+    sprintf(str, "%s %s %s\r\n", request->action, request->resource, request->version);
     int i = 0;
     while (i < HEADERS) {
         if (strlen(request->header[i].key.key) > 0) {
@@ -79,12 +79,12 @@ void create_request_str(struct http_request *request, char **str)
             char header[len];
             memset(header, 0, len);
             sprintf(header, "%s: %s\r\n", request->header[i].key.key, request->header[i].value.value);
-            strcat(*str, header);
+            strcat(str, header);
         }
         i++;
     }
-    strcat(*str, "\r\n");
-    strcat(*str, request->body);
+    strcat(str, "\r\n");
+    strcat(str, request->body);
 }
 
 /*---------------------- HTTP response ----------------------*/
